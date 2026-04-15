@@ -9,8 +9,9 @@
       --blue: #1565ff;
       --red: #e53935;
       --white: #ffffff;
-      --panel-height: calc(100dvh - 92px);
-      --menu-height: 92px;
+      --bg: #101215;
+      --panel-height: calc(100dvh - 96px);
+      --menu-height: 96px;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -18,44 +19,62 @@
       height: 100%;
       overflow: hidden;
       font-family: Arial, Helvetica, sans-serif;
-      background: #000;
+      background: var(--bg);
     }
     body { color: var(--white); user-select: none; touch-action: manipulation; }
     .app { height: 100dvh; display: flex; flex-direction: column; }
     .board { height: var(--panel-height); display: flex; width: 100%; }
     .team {
       position: relative; flex: 1; border: none; color: var(--white); display: flex;
-      align-items: center; justify-content: center; font-weight: 800;
-      font-size: clamp(4rem, 18vw, 9rem); cursor: pointer; overflow: hidden;
+      flex-direction: column; align-items: center; justify-content: center; font-weight: 800;
+      cursor: pointer; overflow: hidden; padding: 18px;
     }
     .team:active { filter: brightness(1.08); }
-    .team.blue { background: var(--blue); }
-    .team.red { background: var(--red); }
-    .label {
-      position: absolute; top: 16px; left: 18px; font-size: clamp(1rem, 2.8vw, 1.35rem);
-      font-weight: 700; opacity: 0.95; pointer-events: none;
+    .team.blue { background: linear-gradient(180deg, #2b7bff 0%, var(--blue) 100%); }
+    .team.red { background: linear-gradient(180deg, #ff5757 0%, var(--red) 100%); }
+    .nameWrap {
+      position: absolute; top: 14px; left: 14px; right: 14px; display: flex; align-items: center; gap: 8px;
     }
-    .score { line-height: 1; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; pointer-events: none; }
+    .teamName {
+      background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: var(--white);
+      border-radius: 12px; padding: 10px 12px; min-width: 0; flex: 1; font-size: 1rem; font-weight: 700;
+      outline: none;
+    }
+    .teamName::placeholder { color: rgba(255,255,255,0.75); }
+    .setBox {
+      position: absolute; top: 70px; left: 14px; display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 8px 10px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .setValue { min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+    .setBtn, .undo {
+      border: 2px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.14); color: var(--white);
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800;
+    }
+    .setBtn { width: 34px; height: 34px; border-radius: 10px; font-size: 1rem; }
+    .score {
+      line-height: 1; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; pointer-events: none;
+      font-size: clamp(4rem, 14vw, 8rem);
+    }
+    .scoreLabel { margin-top: 10px; font-size: 1rem; font-weight: 700; opacity: 0.92; pointer-events: none; }
     .undo {
-      position: absolute; right: 14px; bottom: 14px; width: 56px; height: 56px; border-radius: 999px;
-      border: 2px solid rgba(255,255,255,0.45); background: rgba(255,255,255,0.14); color: var(--white);
-      font-size: 1.35rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; z-index: 2;
+      position: absolute; right: 14px; bottom: 14px; width: 58px; height: 58px; border-radius: 999px;
+      font-size: 1.35rem; z-index: 2;
     }
-    .undo:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
+    .setBtn:active, .undo:active, .menu button:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
     .menu {
-      height: var(--menu-height); display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      padding: 10px; background: #1a1a1a; border-top: 2px solid rgba(255,255,255,0.12);
+      height: var(--menu-height); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      padding: 10px; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08);
     }
     .menu button {
-      border: none; border-radius: 16px; background: #2c2c2c; color: var(--white);
-      font-size: 1rem; font-weight: 700; cursor: pointer;
+      border: none; border-radius: 16px; background: #2b3038; color: var(--white);
+      font-size: 0.96rem; font-weight: 700; cursor: pointer;
     }
-    .menu button:active { transform: scale(0.99); background: #3a3a3a; }
-    @media (max-width: 640px) {
-      :root { --menu-height: 84px; --panel-height: calc(100dvh - 84px); }
+    @media (max-height: 500px) {
+      :root { --menu-height: 78px; --panel-height: calc(100dvh - 78px); }
+      .setBox { top: 60px; }
       .undo { width: 50px; height: 50px; }
-      .label { top: 12px; left: 14px; }
+      .teamName { padding: 8px 10px; }
     }
   </style>
 </head>
@@ -63,53 +82,113 @@
   <div class="app">
     <div class="board" id="board"></div>
     <div class="menu">
-      <button id="resetBtn" type="button">전체 초기화</button>
+      <button id="resetScoreBtn" type="button">점수 초기화</button>
+      <button id="resetAllBtn" type="button">점수+세트 초기화</button>
       <button id="swapBtn" type="button">좌우 바꾸기</button>
+      <button id="swapColorBtn" type="button">팀 색상 바꾸기</button>
     </div>
   </div>
   <script>
-    const state = { blue: 0, red: 0, order: ['blue', 'red'] };
-    const board = document.getElementById('board');
-    const resetBtn = document.getElementById('resetBtn');
-    const swapBtn = document.getElementById('swapBtn');
-    const teamMeta = {
-      blue: { label: '파란팀', className: 'blue' },
-      red: { label: '빨간팀', className: 'red' }
+    const state = {
+      blue: { score: 0, sets: 0, name: '파란팀' },
+      red: { score: 0, sets: 0, name: '빨간팀' },
+      order: ['blue', 'red']
     };
+    const board = document.getElementById('board');
+    const resetScoreBtn = document.getElementById('resetScoreBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const swapColorBtn = document.getElementById('swapColorBtn');
+
     function clampScore(value) { return Math.max(0, Math.min(99, value)); }
+    function clampSet(value) { return Math.max(0, Math.min(9, value)); }
     function formatScore(value) { return String(clampScore(value)).padStart(2, '0'); }
-    function addPoint(team) { state[team] = clampScore(state[team] + 1); render(); }
-    function undoPoint(team) { state[team] = clampScore(state[team] - 1); render(); }
-    function resetScores() { state.blue = 0; state.red = 0; render(); }
+    function addPoint(team) { state[team].score = clampScore(state[team].score + 1); render(); }
+    function undoPoint(team) { state[team].score = clampScore(state[team].score - 1); render(); }
+    function addSet(team) { state[team].sets = clampSet(state[team].sets + 1); render(); }
+    function undoSet(team) { state[team].sets = clampSet(state[team].sets - 1); render(); }
+    function resetScores() { ['blue','red'].forEach(t => state[t].score = 0); render(); }
+    function resetAll() { ['blue','red'].forEach(t => { state[t].score = 0; state[t].sets = 0; }); render(); }
     function swapSides() { state.order.reverse(); render(); }
+    function swapColors() {
+      const blueData = { ...state.blue };
+      state.blue = { ...state.red };
+      state.red = blueData;
+      render();
+    }
+    function updateName(team, value) { state[team].name = value.trim() || (team === 'blue' ? '파란팀' : '빨간팀'); }
+
     function makeTeamPanel(team) {
-      const meta = teamMeta[team];
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = `team ${meta.className}`;
-      button.setAttribute('aria-label', `${meta.label} 점수 올리기`);
+      button.className = `team ${team}`;
+      button.setAttribute('aria-label', `${state[team].name} 점수 올리기`);
       button.addEventListener('click', () => addPoint(team));
-      const label = document.createElement('div');
-      label.className = 'label';
-      label.textContent = meta.label;
+
+      const nameWrap = document.createElement('div');
+      nameWrap.className = 'nameWrap';
+      const nameInput = document.createElement('input');
+      nameInput.className = 'teamName';
+      nameInput.value = state[team].name;
+      nameInput.maxLength = 12;
+      nameInput.placeholder = team === 'blue' ? '파란팀' : '빨간팀';
+      nameInput.addEventListener('click', (event) => event.stopPropagation());
+      nameInput.addEventListener('input', (event) => updateName(team, event.target.value));
+      nameWrap.appendChild(nameInput);
+
+      const setBox = document.createElement('div');
+      setBox.className = 'setBox';
+      setBox.addEventListener('click', (event) => event.stopPropagation());
+      const setMinus = document.createElement('button');
+      setMinus.type = 'button';
+      setMinus.className = 'setBtn';
+      setMinus.textContent = '-';
+      setMinus.setAttribute('aria-label', `${state[team].name} 세트 감소`);
+      setMinus.addEventListener('click', () => undoSet(team));
+      const setValue = document.createElement('div');
+      setValue.className = 'setValue';
+      setValue.textContent = `세트 ${state[team].sets}`;
+      const setPlus = document.createElement('button');
+      setPlus.type = 'button';
+      setPlus.className = 'setBtn';
+      setPlus.textContent = '+';
+      setPlus.setAttribute('aria-label', `${state[team].name} 세트 증가`);
+      setPlus.addEventListener('click', () => addSet(team));
+      setBox.appendChild(setMinus);
+      setBox.appendChild(setValue);
+      setBox.appendChild(setPlus);
+
       const score = document.createElement('div');
       score.className = 'score';
-      score.textContent = formatScore(state[team]);
+      score.textContent = formatScore(state[team].score);
+      const scoreLabel = document.createElement('div');
+      scoreLabel.className = 'scoreLabel';
+      scoreLabel.textContent = '터치하면 점수 +1';
+
       const undo = document.createElement('button');
       undo.type = 'button';
       undo.className = 'undo';
       undo.textContent = '↺';
-      undo.setAttribute('aria-label', `${meta.label} 점수 되돌리기`);
+      undo.setAttribute('aria-label', `${state[team].name} 점수 되돌리기`);
       undo.addEventListener('click', (event) => { event.stopPropagation(); undoPoint(team); });
-      button.appendChild(label); button.appendChild(score); button.appendChild(undo);
+
+      button.appendChild(nameWrap);
+      button.appendChild(setBox);
+      button.appendChild(score);
+      button.appendChild(scoreLabel);
+      button.appendChild(undo);
       return button;
     }
+
     function render() {
       board.innerHTML = '';
       state.order.forEach((team) => board.appendChild(makeTeamPanel(team)));
     }
-    resetBtn.addEventListener('click', resetScores);
+
+    resetScoreBtn.addEventListener('click', resetScores);
+    resetAllBtn.addEventListener('click', resetAll);
     swapBtn.addEventListener('click', swapSides);
+    swapColorBtn.addEventListener('click', swapColors);
     render();
   </script>
 </body>

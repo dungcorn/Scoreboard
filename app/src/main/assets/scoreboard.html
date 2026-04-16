@@ -11,8 +11,8 @@
       --white: #ffffff;
       --bg: #101215;
       --menu-height: 96px;
-      --panel-height: calc(100dvh - var(--menu-height));
-      --score-top-offset: 118px;
+      --panel-height: calc(100dvh - 50px);
+      --score-top-offset: -6vh;
       --name-top: 18px;
       --name-side: 18px;
     }
@@ -21,7 +21,7 @@
     body { color: var(--white); user-select: none; touch-action: manipulation; }
     button, input { font: inherit; }
     .app { height: 100dvh; display: flex; flex-direction: column; }
-    .board { position: relative; height: var(--panel-height); display: flex; width: 100%; }
+    .board { position: relative; height: calc(100dvh - 40px); display: flex; width: 100%; overflow: hidden; }
     .topHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 8; width: min(560px, calc(100% - 24px)); display: flex; justify-content: center; pointer-events: none; }
     .setBoard { pointer-events: auto; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.97); color: #111; border-radius: 22px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.7); }
     .setSide { display: flex; align-items: center; gap: 8px; }
@@ -30,42 +30,42 @@
     .setValue.right { color: var(--right-team); }
     .setDivider { width: 1px; height: 34px; background: rgba(0,0,0,0.14); }
     .setBtn { border: none; width: 38px; height: 38px; border-radius: 12px; background: #eef2f6; color: #111; font-size: 1.1rem; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
-    .team { position: relative; flex: 1; border: none; color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; overflow: hidden; padding: 18px 18px 28px; }
+    .team { position: relative; flex: 1; border: none; color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; font-weight: 800; cursor: pointer; overflow: hidden; padding: 12px 12px 12px; }
     .team:active { filter: brightness(1.05); }
     .team.left { background: linear-gradient(180deg, color-mix(in srgb, var(--left-team) 72%, white 28%) 0%, var(--left-team) 100%); }
     .team.right { background: linear-gradient(180deg, color-mix(in srgb, var(--right-team) 72%, white 28%) 0%, var(--right-team) 100%); }
-    .teamNameBtn { position: absolute; top: var(--name-top); z-index: 6; max-width: calc(100% - 36px); background: transparent; border: none; color: var(--white); padding: 0; font-size: clamp(3rem, 6.4vw, 4.8rem); line-height: 0.95; font-weight: 900; text-shadow: 0 3px 14px rgba(0,0,0,0.26); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .teamNameBtn { position: absolute; top: var(--name-top); z-index: 6; max-width: calc(100% - 36px); background: transparent; border: none; color: var(--white); padding: 0; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 0.95; font-weight: 900; text-shadow: 0 3px 14px rgba(0,0,0,0.26); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .team.left .teamNameBtn { left: var(--name-side); text-align: left; }
     .team.right .teamNameBtn { right: var(--name-side); text-align: right; }
-    .scoreWrap { display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translateY(var(--score-top-offset)); pointer-events: none; }
-    .score { line-height: 0.92; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; font-weight: 900; text-shadow: 0 10px 24px rgba(0,0,0,0.18); font-size: clamp(5.6rem, 17vw, 10rem); }
-    .scoreLabel { margin-top: 8px; font-size: 1.08rem; font-weight: 800; opacity: 0.94; }
+    .scoreWrap { position: absolute; left: 50%; top: 24%; transform: translateX(-50%); pointer-events: none; }
+    .score { line-height: 0.92; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; font-weight: 900; text-shadow: 0 10px 24px rgba(0,0,0,0.18); font-size: clamp(5rem, 15vw, 8.8rem); }
+    .scoreLabel { margin-top: 4px; font-size: 0.9rem; font-weight: 800; opacity: 0.94; }
     .undo { position: absolute; right: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.14); color: var(--white); font-size: 1.35rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 3; }
     .colorFab { position: absolute; left: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.16); color: var(--white); cursor: pointer; z-index: 4; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(0,0,0,0.15); }
     .team.right .colorFab { left: auto; right: 16px; }
     .team.right .undo { right: auto; left: 16px; }
     .paletteIcon { width: 26px; height: 26px; border-radius: 999px; background: conic-gradient(from 0deg, #ff5a5f, #ffb300, #38b000, #00b8d9, #5e60ce, #d63384, #ff5a5f); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.78); }
-    .colorPanel { position: absolute; left: 18px; bottom: 88px; width: 312px; background: #e5e5e7; color: #111; border-radius: 18px; padding: 14px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); z-index: 10; display: none; }
-    .team.right .colorPanel { left: auto; right: 18px; }
-    .colorPanel.open { display: block; }
-    .colorTitle { font-size: 0.98rem; font-weight: 900; margin-bottom: 12px; text-align: center; }
-    .presetGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .colorPanel { position: absolute; left: 14px; bottom: 62px; width: min(162px, calc(100vw - 28px)); background: #e5e5e7; color: #111; border-radius: 12px; padding: 10px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); z-index: 20; display: none; transform: scale(0.7); transform-origin: bottom left; }
+    .team.right .colorPanel { left: auto; right: 14px; bottom: 62px; transform-origin: bottom right; }
+    .colorPanel.open { display: block; bottom: 0; }
+    .colorTitle { font-size: 0.78rem; font-weight: 900; margin-bottom: 4px; text-align: center; }
+    .presetGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
     .presetSwatch, .addColorBtn {
-      width: 100%; aspect-ratio: 1; border-radius: 16px; border: none; cursor: pointer; position: relative;
+      width: 100%; aspect-ratio: 1; border-radius: 10px; border: none; cursor: pointer; position: relative;
       box-shadow: 0 2px 6px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.08);
     }
     .presetSwatch.active::after {
       content: ''; position: absolute; inset: 4px; border: 2px solid rgba(255,255,255,0.9); border-radius: 12px; box-shadow: 0 0 0 2px rgba(72,86,115,0.8);
     }
-    .addColorBtn { background: #d8d8dc; color: #1f2937; font-size: 2rem; font-weight: 900; }
-    .panelActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-    .deleteColorBtn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
-    .deleteColorBtn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
-    .panelBtn { border: none; border-radius: 14px; padding: 14px 12px; font-size: 1rem; font-weight: 900; cursor: pointer; }
+    .addColorBtn { background: #d8d8dc; color: #1f2937; font-size: 1.5rem; font-weight: 900; }
+    .panelActions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
+    .deleteColorBtn { margin-top: 6px; width: 100%; border: none; border-radius: 10px; padding: 7px 8px; font-size: 0.72rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
+    .deleteColorBtn { margin-top: 6px; width: 100%; border: none; border-radius: 10px; padding: 7px 8px; font-size: 0.72rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
+    .panelBtn { border: none; border-radius: 10px; padding: 8px 6px; font-size: 0.76rem; font-weight: 900; cursor: pointer; }
     .panelBtn.cancel { background: #efeff2; color: #333; }
     .panelBtn.save { background: #0f172a; color: #fff; }
-    .panelHint { margin-top: 10px; font-size: 0.8rem; color: #555; line-height: 1.45; text-align: center; font-weight: 700; }
-    .pickerEditor { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.08); }
+    .panelHint { display:none; }
+    .pickerEditor { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.08); }
     .pickerSquare {
       position: relative; width: 100%; aspect-ratio: 1.15 / 1; border-radius: 14px; overflow: hidden; cursor: crosshair;
       background-image: linear-gradient(to top, black, transparent), linear-gradient(to right, white, hsl(0 100% 50%));
@@ -75,8 +75,8 @@
       position: absolute; width: 18px; height: 18px; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.32);
       transform: translate(-50%, -50%); pointer-events: none;
     }
-    .sliderRow { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; margin-top: 12px; }
-    .colorPreview { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); }
+    .sliderRow { display: grid; grid-template-columns: 30px 1fr; gap: 6px; align-items: center; margin-top: 6px; }
+    .colorPreview { width: 28px; height: 28px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); }
     .hueSlider {
       -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border-radius: 999px; outline: none; margin: 0;
       background: linear-gradient(90deg, #ff0000 0%, #ffff00 16.66%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.66%, #ff00ff 83.33%, #ff0000 100%);
@@ -84,11 +84,11 @@
     }
     .hueSlider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 999px; background: #fff; border: 2px solid #3b3f46; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
     .hueSlider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 999px; background: #fff; border: 2px solid #3b3f46; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
-    .rgbRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .rgbRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 6px; }
     .rgbField { display: flex; flex-direction: column; gap: 4px; }
-    .rgbField input { width: 100%; border: 1px solid #cfd5de; border-radius: 10px; padding: 10px 8px; text-align: center; font-size: 1rem; background: #f5f6f9; color: #111; }
-    .rgbField label { text-align: center; font-size: 0.88rem; color: #2b2f38; }
-    .hexInput { width: 100%; border: 1px solid #cfd5de; border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: 0.98rem; font-weight: 700; background: #f5f6f9; color: #111; }
+    .rgbField input { width: 100%; border: 1px solid #cfd5de; border-radius: 8px; padding: 6px 6px; text-align: center; font-size: 0.78rem; background: #f5f6f9; color: #111; }
+    .rgbField label { text-align: center; font-size: 0.72rem; color: #2b2f38; }
+    .hexInput { width: 100%; border: 1px solid #cfd5de; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 0.76rem; font-weight: 700; background: #f5f6f9; color: #111; }
     .editorActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
     .nameModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 30; background: rgba(0,0,0,0.45); padding: 20px; }
     .nameModal.open { display: flex; }
@@ -101,8 +101,9 @@
     .modalBtn.cancel { background: #edf1f5; color: #273142; }
     .modalBtn.save { background: #111827; color: #fff; }
     .setBtn:active, .undo:active, .colorFab:active, .menu button:active, .panelBtn:active, .modalBtn:active, .teamNameBtn:active, .presetSwatch:active, .addColorBtn:active { transform: scale(0.97); }
-    .menu { height: var(--menu-height); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08); }
-    .menu button { border: none; border-radius: 16px; background: #2b3038; color: var(--white); font-size: 0.96rem; font-weight: 700; cursor: pointer; }
+    .menu { height: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 0 4px 0; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08); position: relative; z-index: 1; margin-top: auto; }
+    /* EDIT HERE: 하단 버튼 크기와 간격 조절 */
+    .menu button { border: none; border-radius: 12px; background: #2b3038; color: var(--white); font-size: 0.96rem; font-weight: 700; cursor: pointer; padding: 0 2px; height: 34px; }
     @media (max-height: 740px) {
       :root { --score-top-offset: 126px; --name-top: 16px; }
       .teamNameBtn { font-size: clamp(2.5rem, 5.8vw, 4rem); max-width: calc(100% - 28px); }
@@ -119,7 +120,13 @@
       .undo, .colorFab { width: 50px; height: 50px; bottom: 12px; }
       .colorPanel { bottom: 70px; width: 284px; }
     }
-  </style>
+  
+.team { position: relative; }
+.colorPanel { position: absolute; bottom: 0px; }
+.team.left .colorPanel, .team.right .colorPanel { top: auto !important; bottom: 0px !important; }
+.team.left .undoBtn, .team.right .undoBtn { top: auto !important; bottom: 0px !important; }
+
+</style>
 </head>
 <body>
   <div class="app">
@@ -258,7 +265,13 @@
     function undoSet(team){ state[team].sets = clampSet(state[team].sets - 1); render(); }
     function resetScores(){ ['left','right'].forEach(t => state[t].score = 0); render(); }
     function resetAll(){ ['left','right'].forEach(t => { state[t].score = 0; state[t].sets = 0; }); render(); }
-    function swapSides(){ state.order.reverse(); render(); }
+    function swapSides(){
+  const left = JSON.parse(JSON.stringify(state.left));
+  const right = JSON.parse(JSON.stringify(state.right));
+  state.left = right;
+  state.right = left;
+  render();
+}
     function swapColors(){
       const leftColor = state.left.color;
       state.left.color = state.right.color;
@@ -350,6 +363,8 @@
       render();
     }
 
+    // 점수 초기화 버튼 높이: .setBtn { width: 38px; height: 38px; }
+    // 아래 메뉴 버튼 높이: .menu button { height: 44px; }
     function makeSetBoard(){
       const wrap = document.createElement('div');
       wrap.className = 'topHud';
@@ -549,7 +564,7 @@
 
       const hint = document.createElement('div');
       hint.className = 'panelHint';
-      hint.textContent = '기본 색은 눌러 선택하고 저장하세요. 추가 색상은 + 버튼으로 만들고 저장한 뒤, 여기서 삭제할 수 있습니다.';
+      hint.textContent = '기본 색은 눌러 선택하고 저장하세요. 추가 색상은 + 버튼으로 만들고 저장할 수 있습니다.';
 
       panel.append(title, grid, actions, deleteBtn, hint);
       return panel;

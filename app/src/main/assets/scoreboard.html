@@ -6,75 +6,118 @@
   <title>간단 스코어보드</title>
   <style>
     :root {
-      --blue: #1565ff;
-      --red: #e53935;
+      --left-team: #1565ff;
+      --right-team: #e53935;
       --white: #ffffff;
       --bg: #101215;
-      --panel-height: calc(100dvh - 96px);
       --menu-height: 96px;
+      --panel-height: calc(100dvh - var(--menu-height));
+      --score-top-offset: 118px;
+      --name-top: 18px;
+      --name-side: 18px;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-    }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: Arial, Helvetica, sans-serif; background: var(--bg); }
     body { color: var(--white); user-select: none; touch-action: manipulation; }
+    button, input { font: inherit; }
     .app { height: 100dvh; display: flex; flex-direction: column; }
-    .board { height: var(--panel-height); display: flex; width: 100%; }
-    .team {
-      position: relative; flex: 1; border: none; color: var(--white); display: flex;
-      flex-direction: column; align-items: center; justify-content: center; font-weight: 800;
-      cursor: pointer; overflow: hidden; padding: 18px;
+    .board { position: relative; height: var(--panel-height); display: flex; width: 100%; }
+    .topHud { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 8; width: min(560px, calc(100% - 24px)); display: flex; justify-content: center; pointer-events: none; }
+    .setBoard { pointer-events: auto; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.97); color: #111; border-radius: 22px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.7); }
+    .setSide { display: flex; align-items: center; gap: 8px; }
+    .setValue { min-width: 2.2ch; text-align: center; font-size: 1.5rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .setValue.left { color: var(--left-team); }
+    .setValue.right { color: var(--right-team); }
+    .setDivider { width: 1px; height: 34px; background: rgba(0,0,0,0.14); }
+    .setBtn { border: none; width: 38px; height: 38px; border-radius: 12px; background: #eef2f6; color: #111; font-size: 1.1rem; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+    .team { position: relative; flex: 1; border: none; color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; overflow: hidden; padding: 18px 18px 28px; }
+    .team:active { filter: brightness(1.05); }
+    .team.left { background: linear-gradient(180deg, color-mix(in srgb, var(--left-team) 72%, white 28%) 0%, var(--left-team) 100%); }
+    .team.right { background: linear-gradient(180deg, color-mix(in srgb, var(--right-team) 72%, white 28%) 0%, var(--right-team) 100%); }
+    .teamNameBtn { position: absolute; top: var(--name-top); z-index: 6; max-width: calc(100% - 36px); background: transparent; border: none; color: var(--white); padding: 0; font-size: clamp(3rem, 6.4vw, 4.8rem); line-height: 0.95; font-weight: 900; text-shadow: 0 3px 14px rgba(0,0,0,0.26); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .team.left .teamNameBtn { left: var(--name-side); text-align: left; }
+    .team.right .teamNameBtn { right: var(--name-side); text-align: right; }
+    .scoreWrap { display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translateY(var(--score-top-offset)); pointer-events: none; }
+    .score { line-height: 0.92; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; font-weight: 900; text-shadow: 0 10px 24px rgba(0,0,0,0.18); font-size: clamp(5.6rem, 17vw, 10rem); }
+    .scoreLabel { margin-top: 8px; font-size: 1.08rem; font-weight: 800; opacity: 0.94; }
+    .undo { position: absolute; right: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.14); color: var(--white); font-size: 1.35rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 3; }
+    .colorFab { position: absolute; left: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.16); color: var(--white); cursor: pointer; z-index: 4; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(0,0,0,0.15); }
+    .team.right .colorFab { left: auto; right: 16px; }
+    .team.right .undo { right: auto; left: 16px; }
+    .paletteIcon { width: 26px; height: 26px; border-radius: 999px; background: conic-gradient(from 0deg, #ff5a5f, #ffb300, #38b000, #00b8d9, #5e60ce, #d63384, #ff5a5f); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.78); }
+    .colorPanel { position: absolute; left: 18px; bottom: 88px; width: 312px; background: #e5e5e7; color: #111; border-radius: 18px; padding: 14px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); z-index: 10; display: none; }
+    .team.right .colorPanel { left: auto; right: 18px; }
+    .colorPanel.open { display: block; }
+    .colorTitle { font-size: 0.98rem; font-weight: 900; margin-bottom: 12px; text-align: center; }
+    .presetGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .presetSwatch, .addColorBtn {
+      width: 100%; aspect-ratio: 1; border-radius: 16px; border: none; cursor: pointer; position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.08);
     }
-    .team:active { filter: brightness(1.08); }
-    .team.blue { background: linear-gradient(180deg, #2b7bff 0%, var(--blue) 100%); }
-    .team.red { background: linear-gradient(180deg, #ff5757 0%, var(--red) 100%); }
-    .nameWrap {
-      position: absolute; top: 14px; left: 14px; right: 14px; display: flex; align-items: center; gap: 8px;
+    .presetSwatch.active::after {
+      content: ''; position: absolute; inset: 4px; border: 2px solid rgba(255,255,255,0.9); border-radius: 12px; box-shadow: 0 0 0 2px rgba(72,86,115,0.8);
     }
-    .teamName {
-      background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: var(--white);
-      border-radius: 12px; padding: 10px 12px; min-width: 0; flex: 1; font-size: 1rem; font-weight: 700;
-      outline: none;
+    .addColorBtn { background: #d8d8dc; color: #1f2937; font-size: 2rem; font-weight: 900; }
+    .panelActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .deleteColorBtn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
+    .deleteColorBtn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 900; cursor: pointer; background: #c62828; color: #fff; }
+    .panelBtn { border: none; border-radius: 14px; padding: 14px 12px; font-size: 1rem; font-weight: 900; cursor: pointer; }
+    .panelBtn.cancel { background: #efeff2; color: #333; }
+    .panelBtn.save { background: #0f172a; color: #fff; }
+    .panelHint { margin-top: 10px; font-size: 0.8rem; color: #555; line-height: 1.45; text-align: center; font-weight: 700; }
+    .pickerEditor { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.08); }
+    .pickerSquare {
+      position: relative; width: 100%; aspect-ratio: 1.15 / 1; border-radius: 14px; overflow: hidden; cursor: crosshair;
+      background-image: linear-gradient(to top, black, transparent), linear-gradient(to right, white, hsl(0 100% 50%));
+      border: 1px solid rgba(0,0,0,0.12);
     }
-    .teamName::placeholder { color: rgba(255,255,255,0.75); }
-    .setBox {
-      position: absolute; top: 70px; left: 14px; display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 8px 10px;
-      font-weight: 700; font-size: 0.95rem;
+    .pickerKnob {
+      position: absolute; width: 18px; height: 18px; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.32);
+      transform: translate(-50%, -50%); pointer-events: none;
     }
-    .setValue { min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
-    .setBtn, .undo {
-      border: 2px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.14); color: var(--white);
-      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800;
+    .sliderRow { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; margin-top: 12px; }
+    .colorPreview { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); }
+    .hueSlider {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border-radius: 999px; outline: none; margin: 0;
+      background: linear-gradient(90deg, #ff0000 0%, #ffff00 16.66%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.66%, #ff00ff 83.33%, #ff0000 100%);
+      border: 1px solid rgba(0,0,0,0.12);
     }
-    .setBtn { width: 34px; height: 34px; border-radius: 10px; font-size: 1rem; }
-    .score {
-      line-height: 1; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; pointer-events: none;
-      font-size: clamp(4rem, 14vw, 8rem);
+    .hueSlider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 999px; background: #fff; border: 2px solid #3b3f46; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+    .hueSlider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 999px; background: #fff; border: 2px solid #3b3f46; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+    .rgbRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .rgbField { display: flex; flex-direction: column; gap: 4px; }
+    .rgbField input { width: 100%; border: 1px solid #cfd5de; border-radius: 10px; padding: 10px 8px; text-align: center; font-size: 1rem; background: #f5f6f9; color: #111; }
+    .rgbField label { text-align: center; font-size: 0.88rem; color: #2b2f38; }
+    .hexInput { width: 100%; border: 1px solid #cfd5de; border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: 0.98rem; font-weight: 700; background: #f5f6f9; color: #111; }
+    .editorActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .nameModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 30; background: rgba(0,0,0,0.45); padding: 20px; }
+    .nameModal.open { display: flex; }
+    .modalCard { width: min(420px, 100%); background: #fff; color: #111; border-radius: 22px; padding: 20px; box-shadow: 0 18px 50px rgba(0,0,0,0.28); }
+    .modalTitle { font-size: 1.15rem; font-weight: 900; margin-bottom: 12px; }
+    .modalInput { width: 100%; border: 2px solid #d8dde6; border-radius: 14px; padding: 14px 16px; font-size: 1.15rem; font-weight: 800; outline: none; }
+    .modalInput:focus, .hexInput:focus, .rgbField input:focus { border-color: #64748b; outline: none; }
+    .modalActions { display: flex; gap: 10px; margin-top: 14px; }
+    .modalBtn { flex: 1; border: none; border-radius: 14px; padding: 12px 14px; font-size: 1rem; font-weight: 900; cursor: pointer; }
+    .modalBtn.cancel { background: #edf1f5; color: #273142; }
+    .modalBtn.save { background: #111827; color: #fff; }
+    .setBtn:active, .undo:active, .colorFab:active, .menu button:active, .panelBtn:active, .modalBtn:active, .teamNameBtn:active, .presetSwatch:active, .addColorBtn:active { transform: scale(0.97); }
+    .menu { height: var(--menu-height); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08); }
+    .menu button { border: none; border-radius: 16px; background: #2b3038; color: var(--white); font-size: 0.96rem; font-weight: 700; cursor: pointer; }
+    @media (max-height: 740px) {
+      :root { --score-top-offset: 126px; --name-top: 16px; }
+      .teamNameBtn { font-size: clamp(2.5rem, 5.8vw, 4rem); max-width: calc(100% - 28px); }
+      .score { font-size: clamp(5rem, 16vw, 8.6rem); }
     }
-    .scoreLabel { margin-top: 10px; font-size: 1rem; font-weight: 700; opacity: 0.92; pointer-events: none; }
-    .undo {
-      position: absolute; right: 14px; bottom: 14px; width: 58px; height: 58px; border-radius: 999px;
-      font-size: 1.35rem; z-index: 2;
-    }
-    .setBtn:active, .undo:active, .menu button:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
-    .menu {
-      height: var(--menu-height); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-      padding: 10px; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08);
-    }
-    .menu button {
-      border: none; border-radius: 16px; background: #2b3038; color: var(--white);
-      font-size: 0.96rem; font-weight: 700; cursor: pointer;
-    }
-    @media (max-height: 500px) {
-      :root { --menu-height: 78px; --panel-height: calc(100dvh - 78px); }
-      .setBox { top: 60px; }
-      .undo { width: 50px; height: 50px; }
-      .teamName { padding: 8px 10px; }
+    @media (max-height: 560px) {
+      :root { --menu-height: 78px; --panel-height: calc(100dvh - 78px); --score-top-offset: 86px; --name-top: 12px; }
+      .topHud { top: 8px; }
+      .teamNameBtn { font-size: clamp(2rem, 4.8vw, 3.2rem); }
+      .setBoard { padding: 8px 12px; }
+      .setBtn { width: 34px; height: 34px; }
+      .score { font-size: clamp(4.2rem, 14vw, 7.2rem); }
+      .scoreLabel { font-size: 0.96rem; }
+      .undo, .colorFab { width: 50px; height: 50px; bottom: 12px; }
+      .colorPanel { bottom: 70px; width: 284px; }
     }
   </style>
 </head>
@@ -88,107 +131,470 @@
       <button id="swapColorBtn" type="button">팀 색상 바꾸기</button>
     </div>
   </div>
+
+  <div class="nameModal" id="nameModal" aria-hidden="true">
+    <div class="modalCard">
+      <div class="modalTitle" id="modalTitle">팀 이름 수정</div>
+      <input id="modalNameInput" class="modalInput" type="text" maxlength="12" />
+      <div class="modalActions">
+        <button id="modalCancelBtn" class="modalBtn cancel" type="button">취소</button>
+        <button id="modalSaveBtn" class="modalBtn save" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const storageKey = 'simple-scoreboard-v4';
+    const presetColors = ['#1565ff', '#e53935', '#16a34a', '#f59e0b', '#8e24aa', '#13b5cb', '#7b5a4f', '#e45c93'];
+
     const state = {
-      blue: { score: 0, sets: 0, name: '파란팀' },
-      red: { score: 0, sets: 0, name: '빨간팀' },
-      order: ['blue', 'red']
+      left: { score: 0, sets: 0, name: '파란팀', color: '#1565ff', pickerOpen: false, editorOpen: false, hsv: { h: 220, s: 0.92, v: 1 }, draftHex: '#1565ff', pendingColor: '#1565ff' },
+      right: { score: 0, sets: 0, name: '빨간팀', color: '#e53935', pickerOpen: false, editorOpen: false, hsv: { h: 1, s: 0.76, v: 0.9 }, draftHex: '#e53935', pendingColor: '#e53935' },
+      order: ['left', 'right'],
+      customColors: [],
+      editingTeam: null
     };
+
     const board = document.getElementById('board');
     const resetScoreBtn = document.getElementById('resetScoreBtn');
     const resetAllBtn = document.getElementById('resetAllBtn');
     const swapBtn = document.getElementById('swapBtn');
     const swapColorBtn = document.getElementById('swapColorBtn');
+    const nameModal = document.getElementById('nameModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalNameInput = document.getElementById('modalNameInput');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+    const modalSaveBtn = document.getElementById('modalSaveBtn');
 
-    function clampScore(value) { return Math.max(0, Math.min(99, value)); }
-    function clampSet(value) { return Math.max(0, Math.min(9, value)); }
-    function formatScore(value) { return String(clampScore(value)).padStart(2, '0'); }
-    function addPoint(team) { state[team].score = clampScore(state[team].score + 1); render(); }
-    function undoPoint(team) { state[team].score = clampScore(state[team].score - 1); render(); }
-    function addSet(team) { state[team].sets = clampSet(state[team].sets + 1); render(); }
-    function undoSet(team) { state[team].sets = clampSet(state[team].sets - 1); render(); }
-    function resetScores() { ['blue','red'].forEach(t => state[t].score = 0); render(); }
-    function resetAll() { ['blue','red'].forEach(t => { state[t].score = 0; state[t].sets = 0; }); render(); }
-    function swapSides() { state.order.reverse(); render(); }
-    function swapColors() {
-      const blueData = { ...state.blue };
-      state.blue = { ...state.red };
-      state.red = blueData;
+    function savePersistedState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          left: { name: state.left.name, color: state.left.color },
+          right: { name: state.right.name, color: state.right.color },
+          customColors: state.customColors
+        }));
+      } catch (e) {}
+    }
+
+    function loadPersistedState() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved?.left?.name) state.left.name = saved.left.name;
+        if (saved?.right?.name) state.right.name = saved.right.name;
+        if (saved?.left?.color) state.left.color = saved.left.color;
+        if (saved?.right?.color) state.right.color = saved.right.color;
+        if (Array.isArray(saved?.customColors)) state.customColors = saved.customColors.filter(v => /^#[0-9a-fA-F]{6}$/.test(v));
+      } catch (e) {}
+    }
+
+    function clampScore(v){ return Math.max(0, Math.min(99, v)); }
+    function clampSet(v){ return Math.max(0, Math.min(9, v)); }
+    function clampRgb(v){ return Math.max(0, Math.min(255, Number(v) || 0)); }
+    function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+    function formatScore(v){ return String(clampScore(v)).padStart(2,'0'); }
+    function defaultName(team){ return team === 'left' ? '파란팀' : '빨간팀'; }
+
+    function hsvToRgb(h, s, v) {
+      const c = v * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = v - c;
+      let r = 0, g = 0, b = 0;
+      if (h < 60) [r,g,b] = [c,x,0];
+      else if (h < 120) [r,g,b] = [x,c,0];
+      else if (h < 180) [r,g,b] = [0,c,x];
+      else if (h < 240) [r,g,b] = [0,x,c];
+      else if (h < 300) [r,g,b] = [x,0,c];
+      else [r,g,b] = [c,0,x];
+      return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255) };
+    }
+
+    function rgbToHsv(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const d = max - min;
+      let h = 0;
+      const s = max === 0 ? 0 : d / max;
+      const v = max;
+      if (d !== 0) {
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * (((b - r) / d) + 2);
+        else h = 60 * (((r - g) / d) + 4);
+      }
+      if (h < 0) h += 360;
+      return { h, s, v };
+    }
+
+    function rgbToHex(r,g,b){ return '#' + [r,g,b].map(v => clampRgb(v).toString(16).padStart(2,'0')).join(''); }
+    function hexToRgb(hex){
+      const clean = String(hex).trim().replace('#','');
+      if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
+      return { r: parseInt(clean.slice(0,2),16), g: parseInt(clean.slice(2,4),16), b: parseInt(clean.slice(4,6),16) };
+    }
+
+    function syncDraftHex(team) {
+      const { h, s, v } = state[team].hsv;
+      const rgb = hsvToRgb(h, s, v);
+      state[team].draftHex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+
+    function setDraftFromHex(team, hex) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return;
+      state[team].hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+      state[team].draftHex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+
+    function setDraftFromRgb(team, r, g, b) {
+      const rr = clampRgb(r), gg = clampRgb(g), bb = clampRgb(b);
+      state[team].hsv = rgbToHsv(rr, gg, bb);
+      state[team].draftHex = rgbToHex(rr, gg, bb);
+    }
+
+    function addPoint(team){ state[team].score = clampScore(state[team].score + 1); render(); }
+    function undoPoint(team){ state[team].score = clampScore(state[team].score - 1); render(); }
+    function addSet(team){ state[team].sets = clampSet(state[team].sets + 1); render(); }
+    function undoSet(team){ state[team].sets = clampSet(state[team].sets - 1); render(); }
+    function resetScores(){ ['left','right'].forEach(t => state[t].score = 0); render(); }
+    function resetAll(){ ['left','right'].forEach(t => { state[t].score = 0; state[t].sets = 0; }); render(); }
+    function swapSides(){ state.order.reverse(); render(); }
+    function swapColors(){
+      const leftColor = state.left.color;
+      state.left.color = state.right.color;
+      state.right.color = leftColor;
+      setDraftFromHex('left', state.left.color);
+      setDraftFromHex('right', state.right.color);
+      savePersistedState();
       render();
     }
-    function updateName(team, value) { state[team].name = value.trim() || (team === 'blue' ? '파란팀' : '빨간팀'); }
 
-    function makeTeamPanel(team) {
+    function updateThemeVars(){
+      document.documentElement.style.setProperty('--left-team', state.left.color);
+      document.documentElement.style.setProperty('--right-team', state.right.color);
+    }
+
+    function openColorPanel(team){
+      state.left.pickerOpen = false;
+      state.right.pickerOpen = false;
+      state.left.editorOpen = false;
+      state.right.editorOpen = false;
+      state[team].pickerOpen = true;
+      state[team].pendingColor = state[team].color;
+      setDraftFromHex(team, state[team].color);
+      render();
+    }
+
+    function openEditor(team){
+      state[team].editorOpen = true;
+      setDraftFromHex(team, state[team].pendingColor || state[team].color);
+      render();
+    }
+
+    function closeColorPanels(){
+      state.left.pickerOpen = false;
+      state.right.pickerOpen = false;
+      state.left.editorOpen = false;
+      state.right.editorOpen = false;
+    }
+
+    function savePresetSelection(team){
+      state[team].color = state[team].pendingColor;
+      closeColorPanels();
+      savePersistedState();
+      updateThemeVars();
+      render();
+    }
+
+    function saveCustomColor(team){
+      const color = state[team].draftHex;
+      if (!state.customColors.includes(color)) state.customColors.push(color);
+      state[team].color = color;
+      state[team].pendingColor = color;
+      closeColorPanels();
+      savePersistedState();
+      updateThemeVars();
+      render();
+    }
+
+    function deleteColorEverywhere(color) {
+      state.customColors = state.customColors.filter(c => c !== color);
+      if (state.left.color === color) { state.left.color = presetColors[0]; setDraftFromHex('left', state.left.color); }
+      if (state.right.color === color) { state.right.color = presetColors[1]; setDraftFromHex('right', state.right.color); }
+      if (state.left.pendingColor === color) state.left.pendingColor = state.left.color;
+      if (state.right.pendingColor === color) state.right.pendingColor = state.right.color;
+      savePersistedState();
+    }
+
+    function openNameModal(team){
+      state.editingTeam = team;
+      modalTitle.textContent = `${state[team].name} 이름 수정`;
+      modalNameInput.value = state[team].name;
+      nameModal.classList.add('open');
+      nameModal.setAttribute('aria-hidden','false');
+      setTimeout(() => modalNameInput.focus(), 0);
+    }
+
+    function closeNameModal(){
+      state.editingTeam = null;
+      nameModal.classList.remove('open');
+      nameModal.setAttribute('aria-hidden','true');
+    }
+
+    function saveTeamName(){
+      if(!state.editingTeam) return;
+      const team = state.editingTeam;
+      state[team].name = modalNameInput.value.trim() || defaultName(team);
+      savePersistedState();
+      closeNameModal();
+      render();
+    }
+
+    function makeSetBoard(){
+      const wrap = document.createElement('div');
+      wrap.className = 'topHud';
+      const setBoard = document.createElement('div');
+      setBoard.className = 'setBoard';
+      setBoard.addEventListener('click',e=>e.stopPropagation());
+      const leftSide = document.createElement('div');
+      leftSide.className = 'setSide';
+      const leftMinus = document.createElement('button');
+      leftMinus.type = 'button'; leftMinus.className = 'setBtn'; leftMinus.textContent = '-'; leftMinus.addEventListener('click',()=>undoSet('left'));
+      const leftValue = document.createElement('div'); leftValue.className = 'setValue left'; leftValue.textContent = state.left.sets;
+      const leftPlus = document.createElement('button');
+      leftPlus.type = 'button'; leftPlus.className = 'setBtn'; leftPlus.textContent = '+'; leftPlus.addEventListener('click',()=>addSet('left'));
+      leftSide.append(leftMinus,leftValue,leftPlus);
+      const divider = document.createElement('div'); divider.className = 'setDivider';
+      const rightSide = document.createElement('div'); rightSide.className = 'setSide';
+      const rightMinus = document.createElement('button');
+      rightMinus.type = 'button'; rightMinus.className = 'setBtn'; rightMinus.textContent = '-'; rightMinus.addEventListener('click',()=>undoSet('right'));
+      const rightValue = document.createElement('div'); rightValue.className = 'setValue right'; rightValue.textContent = state.right.sets;
+      const rightPlus = document.createElement('button');
+      rightPlus.type = 'button'; rightPlus.className = 'setBtn'; rightPlus.textContent = '+'; rightPlus.addEventListener('click',()=>addSet('right'));
+      rightSide.append(rightMinus,rightValue,rightPlus);
+      setBoard.append(leftSide,divider,rightSide);
+      wrap.appendChild(setBoard);
+      return wrap;
+    }
+
+    function attachSquareInteraction(square, team) {
+      const updateFromPointer = (clientX, clientY) => {
+        const rect = square.getBoundingClientRect();
+        const x = clamp01((clientX - rect.left) / rect.width);
+        const y = clamp01((clientY - rect.top) / rect.height);
+        state[team].hsv.s = x;
+        state[team].hsv.v = 1 - y;
+        syncDraftHex(team);
+        render();
+      };
+      square.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        updateFromPointer(event.clientX, event.clientY);
+        const move = (e) => updateFromPointer(e.clientX, e.clientY);
+        const up = () => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+      });
+    }
+
+    function makeEditor(team) {
+      const editor = document.createElement('div');
+      editor.className = 'pickerEditor';
+
+      const square = document.createElement('div');
+      square.className = 'pickerSquare';
+      square.style.backgroundImage = `linear-gradient(to top, black, transparent), linear-gradient(to right, white, hsl(${state[team].hsv.h} 100% 50%))`;
+      attachSquareInteraction(square, team);
+
+      const knob = document.createElement('div');
+      knob.className = 'pickerKnob';
+      knob.style.left = `${state[team].hsv.s * 100}%`;
+      knob.style.top = `${(1 - state[team].hsv.v) * 100}%`;
+      square.appendChild(knob);
+
+      const sliderRow = document.createElement('div');
+      sliderRow.className = 'sliderRow';
+      const preview = document.createElement('div');
+      preview.className = 'colorPreview';
+      preview.style.background = state[team].draftHex;
+      const hueSlider = document.createElement('input');
+      hueSlider.type = 'range';
+      hueSlider.min = '0';
+      hueSlider.max = '360';
+      hueSlider.value = Math.round(state[team].hsv.h);
+      hueSlider.className = 'hueSlider';
+      hueSlider.addEventListener('input', (e) => {
+        state[team].hsv.h = Number(e.target.value);
+        syncDraftHex(team);
+        render();
+      });
+      sliderRow.append(preview, hueSlider);
+
+      const rgb = hsvToRgb(state[team].hsv.h, state[team].hsv.s, state[team].hsv.v);
+      const rgbRow = document.createElement('div');
+      rgbRow.className = 'rgbRow';
+      [['r','R',rgb.r],['g','G',rgb.g],['b','B',rgb.b]].forEach(([key,label,value]) => {
+        const field = document.createElement('div');
+        field.className = 'rgbField';
+        const input = document.createElement('input');
+        input.type = 'number'; input.min = '0'; input.max = '255'; input.value = value;
+        input.addEventListener('input', () => {
+          const current = hsvToRgb(state[team].hsv.h, state[team].hsv.s, state[team].hsv.v);
+          current[key] = clampRgb(input.value);
+          setDraftFromRgb(team, current.r, current.g, current.b);
+          render();
+        });
+        const lab = document.createElement('label');
+        lab.textContent = label;
+        field.append(input, lab);
+        rgbRow.appendChild(field);
+      });
+
+      const hexInput = document.createElement('input');
+      hexInput.className = 'hexInput';
+      hexInput.type = 'text';
+      hexInput.maxLength = 7;
+      hexInput.value = state[team].draftHex;
+      hexInput.addEventListener('input', () => {
+        const cleaned = '#' + hexInput.value.replace(/[^0-9a-fA-F]/g, '').replace(/^#+/, '').slice(0,6);
+        if (/^#[0-9a-fA-F]{6}$/.test(cleaned)) {
+          setDraftFromHex(team, cleaned);
+          render();
+        }
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'editorActions';
+      const backBtn = document.createElement('button');
+      backBtn.type = 'button'; backBtn.className = 'panelBtn cancel'; backBtn.textContent = '뒤로';
+      backBtn.addEventListener('click', () => { state[team].editorOpen = false; render(); });
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button'; saveBtn.className = 'panelBtn save'; saveBtn.textContent = '저장';
+      saveBtn.addEventListener('click', () => saveCustomColor(team));
+      actions.append(backBtn, saveBtn);
+
+      editor.append(square, sliderRow, rgbRow, hexInput, actions);
+      return editor;
+    }
+
+    function makePresetPanel(team) {
+      const panel = document.createElement('div');
+      panel.className = `colorPanel ${state[team].pickerOpen ? 'open' : ''}`;
+      panel.addEventListener('click', e => e.stopPropagation());
+
+      const title = document.createElement('div');
+      title.className = 'colorTitle';
+      title.textContent = `${state[team].name} 색상 설정`;
+
+      if (state[team].editorOpen) {
+        panel.append(title, makeEditor(team));
+        return panel;
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'presetGrid';
+      [...presetColors, ...state.customColors].forEach(color => {
+        const swatch = document.createElement('button');
+        swatch.type = 'button';
+        swatch.className = `presetSwatch ${state[team].pendingColor === color ? 'active' : ''}`;
+        swatch.style.background = color;
+        swatch.addEventListener('click', () => {
+          state[team].pendingColor = color;
+          render();
+        });
+        grid.appendChild(swatch);
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'addColorBtn';
+      addBtn.textContent = '+';
+      addBtn.addEventListener('click', () => openEditor(team));
+      grid.appendChild(addBtn);
+
+      const actions = document.createElement('div');
+      actions.className = 'panelActions';
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button'; cancelBtn.className = 'panelBtn cancel'; cancelBtn.textContent = '취소';
+      cancelBtn.addEventListener('click', () => { closeColorPanels(); render(); });
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button'; saveBtn.className = 'panelBtn save'; saveBtn.textContent = '저장';
+      saveBtn.addEventListener('click', () => savePresetSelection(team));
+      actions.append(cancelBtn, saveBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'deleteColorBtn';
+      deleteBtn.textContent = '선택한 저장 색상 삭제';
+      const selectedColor = state[team].pendingColor || state[team].color;
+      const canDelete = state.customColors.includes(selectedColor);
+      deleteBtn.style.display = canDelete ? 'block' : 'none';
+      deleteBtn.disabled = !canDelete;
+      deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const color = selectedColor;
+        if (!state.customColors.includes(color)) return;
+        deleteColorEverywhere(color);
+        const fallback = presetColors[0];
+        if (state[team].color === color) state[team].color = fallback;
+        if (state[team].pendingColor === color) state[team].pendingColor = fallback;
+        savePersistedState();
+        updateThemeVars();
+        render();
+      });
+
+      const hint = document.createElement('div');
+      hint.className = 'panelHint';
+      hint.textContent = '기본 색은 눌러 선택하고 저장하세요. 추가 색상은 + 버튼으로 만들고 저장한 뒤, 여기서 삭제할 수 있습니다.';
+
+      panel.append(title, grid, actions, deleteBtn, hint);
+      return panel;
+    }
+
+    function makeTeamPanel(team){
       const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `team ${team}`;
-      button.setAttribute('aria-label', `${state[team].name} 점수 올리기`);
-      button.addEventListener('click', () => addPoint(team));
-
-      const nameWrap = document.createElement('div');
-      nameWrap.className = 'nameWrap';
-      const nameInput = document.createElement('input');
-      nameInput.className = 'teamName';
-      nameInput.value = state[team].name;
-      nameInput.maxLength = 12;
-      nameInput.placeholder = team === 'blue' ? '파란팀' : '빨간팀';
-      nameInput.addEventListener('click', (event) => event.stopPropagation());
-      nameInput.addEventListener('input', (event) => updateName(team, event.target.value));
-      nameWrap.appendChild(nameInput);
-
-      const setBox = document.createElement('div');
-      setBox.className = 'setBox';
-      setBox.addEventListener('click', (event) => event.stopPropagation());
-      const setMinus = document.createElement('button');
-      setMinus.type = 'button';
-      setMinus.className = 'setBtn';
-      setMinus.textContent = '-';
-      setMinus.setAttribute('aria-label', `${state[team].name} 세트 감소`);
-      setMinus.addEventListener('click', () => undoSet(team));
-      const setValue = document.createElement('div');
-      setValue.className = 'setValue';
-      setValue.textContent = `세트 ${state[team].sets}`;
-      const setPlus = document.createElement('button');
-      setPlus.type = 'button';
-      setPlus.className = 'setBtn';
-      setPlus.textContent = '+';
-      setPlus.setAttribute('aria-label', `${state[team].name} 세트 증가`);
-      setPlus.addEventListener('click', () => addSet(team));
-      setBox.appendChild(setMinus);
-      setBox.appendChild(setValue);
-      setBox.appendChild(setPlus);
-
-      const score = document.createElement('div');
-      score.className = 'score';
-      score.textContent = formatScore(state[team].score);
-      const scoreLabel = document.createElement('div');
-      scoreLabel.className = 'scoreLabel';
-      scoreLabel.textContent = '터치하면 점수 +1';
-
+      button.type = 'button'; button.className = `team ${team}`; button.addEventListener('click',()=>addPoint(team));
+      const teamNameBtn = document.createElement('button');
+      teamNameBtn.type = 'button'; teamNameBtn.className = 'teamNameBtn'; teamNameBtn.textContent = state[team].name;
+      teamNameBtn.addEventListener('click',e=>{ e.stopPropagation(); openNameModal(team); });
+      const scoreWrap = document.createElement('div'); scoreWrap.className = 'scoreWrap';
+      const score = document.createElement('div'); score.className = 'score'; score.textContent = formatScore(state[team].score);
+      const scoreLabel = document.createElement('div'); scoreLabel.className = 'scoreLabel'; scoreLabel.textContent = '터치하면 점수 +1';
+      scoreWrap.append(score,scoreLabel);
       const undo = document.createElement('button');
-      undo.type = 'button';
-      undo.className = 'undo';
-      undo.textContent = '↺';
-      undo.setAttribute('aria-label', `${state[team].name} 점수 되돌리기`);
-      undo.addEventListener('click', (event) => { event.stopPropagation(); undoPoint(team); });
-
-      button.appendChild(nameWrap);
-      button.appendChild(setBox);
-      button.appendChild(score);
-      button.appendChild(scoreLabel);
-      button.appendChild(undo);
+      undo.type = 'button'; undo.className = 'undo'; undo.textContent = '↺';
+      undo.addEventListener('click',e=>{ e.stopPropagation(); undoPoint(team); });
+      const colorFab = document.createElement('button');
+      colorFab.type = 'button'; colorFab.className = 'colorFab';
+      colorFab.addEventListener('click',e=>{ e.stopPropagation(); openColorPanel(team); });
+      const paletteIcon = document.createElement('div'); paletteIcon.className = 'paletteIcon'; colorFab.appendChild(paletteIcon);
+      button.append(teamNameBtn, scoreWrap, undo, colorFab, makePresetPanel(team));
       return button;
     }
 
-    function render() {
+    function render(){
       board.innerHTML = '';
-      state.order.forEach((team) => board.appendChild(makeTeamPanel(team)));
+      updateThemeVars();
+      board.appendChild(makeSetBoard());
+      state.order.forEach(team => board.appendChild(makeTeamPanel(team)));
     }
 
+    loadPersistedState();
+    setDraftFromHex('left', state.left.color);
+    setDraftFromHex('right', state.right.color);
     resetScoreBtn.addEventListener('click', resetScores);
     resetAllBtn.addEventListener('click', resetAll);
     swapBtn.addEventListener('click', swapSides);
     swapColorBtn.addEventListener('click', swapColors);
+    document.addEventListener('click',()=>{ if(state.left.pickerOpen || state.right.pickerOpen){ closeColorPanels(); render(); } });
+    nameModal.addEventListener('click',e=>{ if(e.target===nameModal) closeNameModal(); });
+    modalCancelBtn.addEventListener('click', closeNameModal);
+    modalSaveBtn.addEventListener('click', saveTeamName);
+    modalNameInput.addEventListener('keydown',e=>{ if(e.key==='Enter') saveTeamName(); if(e.key==='Escape') closeNameModal(); });
     render();
   </script>
 </body>

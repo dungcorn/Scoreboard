@@ -38,7 +38,14 @@
     .team.left .teamNameBtn { left: var(--name-side); text-align: left; }
     .team.right .teamNameBtn { right: var(--name-side); text-align: right; }
     .scoreWrap { position: absolute; left: 50%; top: 24%; transform: translateX(-50%); pointer-events: none; }
-    .score { line-height: 0.92; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; font-weight: 900; text-shadow: 0 10px 24px rgba(0,0,0,0.18); font-size: clamp(5rem, 15vw, 8.8rem); }
+    .score {
+      line-height: 0.92;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      text-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      font-size: clamp(7.5rem, 22.5vw, 13.2rem);
+    }
     .scoreLabel { margin-top: 4px; font-size: 0.9rem; font-weight: 800; opacity: 0.94; }
     .undo { position: absolute; right: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.14); color: var(--white); font-size: 1.35rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 3; }
     .colorFab { position: absolute; left: 16px; bottom: 18px; width: 58px; height: 58px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.16); color: var(--white); cursor: pointer; z-index: 4; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(0,0,0,0.15); }
@@ -102,12 +109,11 @@
     .modalBtn.save { background: #111827; color: #fff; }
     .setBtn:active, .undo:active, .colorFab:active, .menu button:active, .panelBtn:active, .modalBtn:active, .teamNameBtn:active, .presetSwatch:active, .addColorBtn:active { transform: scale(0.97); }
     .menu { height: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 0 4px 0; background: #1a1d22; border-top: 2px solid rgba(255,255,255,0.08); position: relative; z-index: 1; margin-top: auto; }
-    /* EDIT HERE: 하단 버튼 크기와 간격 조절 */
     .menu button { border: none; border-radius: 12px; background: #2b3038; color: var(--white); font-size: 0.96rem; font-weight: 700; cursor: pointer; padding: 0 2px; height: 34px; }
     @media (max-height: 740px) {
       :root { --score-top-offset: 126px; --name-top: 16px; }
       .teamNameBtn { font-size: clamp(2.5rem, 5.8vw, 4rem); max-width: calc(100% - 28px); }
-      .score { font-size: clamp(5rem, 16vw, 8.6rem); }
+      .score { font-size: clamp(7.5rem, 24vw, 12.9rem); }
     }
     @media (max-height: 560px) {
       :root { --menu-height: 78px; --panel-height: calc(100dvh - 78px); --score-top-offset: 86px; --name-top: 12px; }
@@ -115,7 +121,7 @@
       .teamNameBtn { font-size: clamp(2rem, 4.8vw, 3.2rem); }
       .setBoard { padding: 8px 12px; }
       .setBtn { width: 34px; height: 34px; }
-      .score { font-size: clamp(4.2rem, 14vw, 7.2rem); }
+      .score { font-size: clamp(6.3rem, 21vw, 10.8rem); }
       .scoreLabel { font-size: 0.96rem; }
       .undo, .colorFab { width: 50px; height: 50px; bottom: 12px; }
       .colorPanel { bottom: 70px; width: 284px; }
@@ -126,7 +132,7 @@
 .team.left .colorPanel, .team.right .colorPanel { top: auto !important; bottom: 0px !important; }
 .team.left .undoBtn, .team.right .undoBtn { top: auto !important; bottom: 0px !important; }
 
-</style>
+  </style>
 </head>
 <body>
   <div class="app">
@@ -200,7 +206,7 @@
     function clampSet(v){ return Math.max(0, Math.min(9, v)); }
     function clampRgb(v){ return Math.max(0, Math.min(255, Number(v) || 0)); }
     function clamp01(v){ return Math.max(0, Math.min(1, v)); }
-    function formatScore(v){ return String(clampScore(v)).padStart(2,'0'); }
+    function formatScore(v){ return String(clampScore(v)); }
     function defaultName(team){ return team === 'left' ? '파란팀' : '빨간팀'; }
 
     function hsvToRgb(h, s, v) {
@@ -266,12 +272,12 @@
     function resetScores(){ ['left','right'].forEach(t => state[t].score = 0); render(); }
     function resetAll(){ ['left','right'].forEach(t => { state[t].score = 0; state[t].sets = 0; }); render(); }
     function swapSides(){
-  const left = JSON.parse(JSON.stringify(state.left));
-  const right = JSON.parse(JSON.stringify(state.right));
-  state.left = right;
-  state.right = left;
-  render();
-}
+      const left = JSON.parse(JSON.stringify(state.left));
+      const right = JSON.parse(JSON.stringify(state.right));
+      state.left = right;
+      state.right = left;
+      render();
+    }
     function swapColors(){
       const leftColor = state.left.color;
       state.left.color = state.right.color;
@@ -363,8 +369,6 @@
       render();
     }
 
-    // 점수 초기화 버튼 높이: .setBtn { width: 38px; height: 38px; }
-    // 아래 메뉴 버튼 높이: .menu button { height: 44px; }
     function makeSetBoard(){
       const wrap = document.createElement('div');
       wrap.className = 'topHud';

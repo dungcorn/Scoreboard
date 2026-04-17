@@ -38,7 +38,7 @@
     .teamNameBtn { position: absolute; top: var(--name-top); z-index: 6; max-width: calc(100% - 36px); background: transparent; border: none; color: var(--white); padding: 0; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 0.95; font-weight: 900; text-shadow: 0 3px 14px rgba(0,0,0,0.26); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .team.left .teamNameBtn { left: var(--name-side); text-align: left; }
     .team.right .teamNameBtn { right: var(--name-side); text-align: right; }
-    .scoreWrap { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); pointer-events: none; }
+    .scoreWrap { position: absolute; left: 50%; top: 33%; transform: translateX(-50%); pointer-events: none; }
     .score {
       line-height: 0.92;
       letter-spacing: 0.01em;
@@ -580,7 +580,7 @@
       teamNameBtn.addEventListener('click',e=>{ e.stopPropagation(); openNameModal(team); });
       const scoreWrap = document.createElement('div'); scoreWrap.className = 'scoreWrap';
       const score = document.createElement('div'); score.className = 'score'; score.textContent = formatScore(state[team].score);
-      const scoreLabel = document.createElement('div'); scoreLabel.className = 'scoreLabel'; scoreLabel.textContent = '터치하면 점수 +1';
+      const scoreLabel = document.createElement('div'); scoreLabel.className = 'scoreLabel'; scoreLabel.textContent = '';
       scoreWrap.append(score,scoreLabel);
       const undo = document.createElement('button');
       undo.type = 'button'; undo.className = 'undo'; undo.textContent = '↺';
